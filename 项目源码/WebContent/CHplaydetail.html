@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>影厅管理</title>
+<style>
+.table th, .table td {
+	text-align: center;
+	height: 30px;
+}
+</style>
+<script>
+UrlParm = function() { // url参数  
+	var data, index;
+	(function init() {
+		data = [];
+		index = {};
+		var u = window.location.search.substr(1);
+		if (u != '') {
+			var parms = decodeURIComponent(u).split('&');
+			for (var i = 0, len = parms.length; i < len; i++) {
+				if (parms[i] != '') {
+					var p = parms[i].split("=");
+					if (p.length == 1 || (p.length == 2 && p[1] == '')) {// p | p=  
+						data.push([ '' ]);
+						index[p[0]] = data.length - 1;
+					} else if (typeof (p[0]) == 'undefined' || p[0] == '') { // =c | =  
+						data[0] = [ p[1] ];
+					} else if (typeof (index[p[0]]) == 'undefined') { // c=aaa  
+						data.push([ p[1] ]);
+						index[p[0]] = data.length - 1;
+					} else {// c=aaa  
+						data[index[p[0]]].push(p[1]);
+					}
+				}
+			}
+		}
+	})();
+	return {
+		// 获得参数,类似request.getParameter()  
+		parm : function(o) { // o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o][0]
+						: data[index[o]][0]);
+			} catch (e) {
+			}
+		},
+		//获得参数组, 类似request.getParameterValues()  
+		parmValues : function(o) { //  o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o] : data[index[o]]);
+			} catch (e) {
+			}
+		},
+		//是否含有parmName参数  
+		hasParm : function(parmName) {
+			return typeof (parmName) == 'string' ? typeof (index[parmName]) != 'undefined'
+					: false;
+		},
+		// 获得参数Map ,类似request.getParameterMap()  
+		parmMap : function() {
+			var map = {};
+			try {
+				for ( var p in index) {
+					map[p] = data[index[p]];
+				}
+			} catch (e) {
+			}
+			return map;
+		}
+	}
+}();
+	
+function init() {
+	var type = UrlParm.parm("type");
+	//alert(type);
+	document.getElementById("type").value = type;
+	
+}
+
+	function check() {
+		//var type = document.getElementById("type");
+		var form = document.getElementById("myform");
+		var playid = document.getElementById("playid");
+		//var playtypeid = document.getElementById("playid");
+		var playname = document.getElementById("playname");
+		var playtype = document.getElementById("playtype");
+		var playlength = document.getElementById("playlength");
+		var playprice = document.getElementById("playprice");
+		var playstatus = document.getElementById("playstatus");
+		var playimage = document.getElementById("playimage");
+		var playintro = document.getElementById("playintro");
+		if(playname.value=="" || playtype.value==""||playlength.value==""||playprice.value==""||playstatus.value==""||playimage.value==""||playintro.value==""){
+			alert("请填写完整信息");
+			return;
+		}
+		alert(playname.value);
+		//(isNaN(playlength)||isNaN(playprice)||isNaN(playstatus)){
+		//	alert("电影时长，价格，状态必须为数字！");
+		//	return;			
+		//}
+		var url = "PlayUpdate";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = checkComplete;
+			var data = "type=" + type.value + "&playid="
+					+ playid.value + "&playname="
+					+ playname.value + "&playtype="
+					+ playtype.value + "&playprice=" + playprice.value
+					+ "&playstatus=" + playstatus.value + "&playimage=" + playimage.value
+					+ "&playintro=" + playintro.value + "&playlength=" + playlength.value;
+			req.send(data);
+			alert(name);
+		}
+	}
+
+	function checkComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			alert(req.responseText);
+		}
+	}
+</script>
+</head>
+<body onload="init()">
+
+	<div
+		style="height: 50px; line-height: 50px; font-size: 25px; vertical-align: middle; text-align: center"
+		class="bg-primary">内涵剧院管理系统</div>
+
+	<div class="row" style="padding: 10px 10px">
+
+		<!-- 左导航栏 -->
+		<div class="col-md-2">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">导航</h3>
+				</div>
+				<div class="panel-body">
+					<table class="table table-hover">
+						<tr>
+							<td><img src="images/yingting.png" width="24px">&nbsp;&nbsp;<a
+								href="CHstudio.html"> 影厅管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/zuowei.png" width="24px">&nbsp;&nbsp;<a
+								href="CHseat.html">座位管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/yingpian.png" width="24px">&nbsp;&nbsp;<a
+								href="CHplay.html"><font color="red">影片管理</font></a></td>
+						</tr>
+						<tr>
+							<td><img src="images/dingpiao.png" width="24px">&nbsp;&nbsp;<a
+								href="CHschedule.html">计划管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHemployee.html">员工管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="cplay.html">我要买票</a></td>
+						</tr>
+						
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHmyinformation.html">个人信息</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHxiaoshou.html">销售额</a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- 增加员工信息 -->
+		<div class="col-md-10" style="padding-top: 10px">
+			<form id="myform" class="form-horizontal" role="form" action="#"
+				method="post">
+				<input type="hidden" id="type" name="type">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影编号</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playid"
+							id="playid" disabled="disabled">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影名称</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playname"
+							id="playname" placeholder="请输入电影名称">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影类型</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playtype"
+							id="playtype" placeholder="请输入电影类型">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影时长</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playlength"
+							id="playlength" placeholder="请输入电影时长">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影价格</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playprice"
+							id="playprice" placeholder="请输入电影价格">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影状态</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playstatus"
+							id="playstatus" placeholder="请输入电影状态（1为在线0为下线）">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影海报</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="playimage"
+							id="playimage" placeholder="请输入电影海报的图片名称">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">电影描述</label>
+					<div class="col-sm-6">
+						<textarea class="form-control" id="playintro" rows="" cols=""></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label"
+						style="color: red; font-weight: bold;"></div>
+					<div class="col-sm-6">
+						<!-- <input type="hidden" name="method" value="add"> -->
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<button type="button" class="btn btn-primary" onclick="check()">提
+							交</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<button type="button" class="btn btn-warning"
+							onclick="javascript:window.location='CHplay.html'">返 回</button>
+					</div>
+				</div>
+			</form>
+
+		</div>
+	</div>
+</body>
+</html>

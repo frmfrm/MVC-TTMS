@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>影厅管理</title>
+<style>
+.row{
+    position: relative;
+}
+#main h3{
+	text-align: center;
+	padding: 10px;
+	width: 100%;
+	border: 1px solid #000;
+}
+.center{
+	width: 990px;
+	height: 100%;
+	margin: 0 auto;
+	position: relative;
+}
+#zuowei {
+	width: 100%;
+	height: 100%;
+	margin-top:  50px;
+}
+#zuowei table{
+	width: 100%;
+	height: 100%;
+}
+#zuowei table img{
+	width: 50px;
+	height: 50px;
+	display: block;
+	margin: 5px;
+	cursor: pointer;
+}
+.table th, .table td {
+	text-align: center;
+	height: 30px;
+}
+button{
+	position: absolute;
+	right: 0px;
+	bottom: -80px;
+	background: #337ab7;
+	width: 60px;
+	height: 40px;
+	border-radius: 7px;
+	font-size: 20px;
+	color: #fff;
+	border: none;
+}
+#bar{
+	width: 25%;
+	font-size: 20px;
+    position: absolute;
+    right: 0;
+    top: 100px;
+}
+#bar>div{
+	margin-bottom: 20px;
+}
+#bar img{
+	width: 40px;
+	height: 40px;
+	display: inline-block;
+	margin-bottom: 20px;
+}
+</style>
+<script>
+    var count = 0;
+UrlParm = function() { // url参数  
+	var data, index;
+	(function init() {
+		data = [];
+		index = {};
+		var u = window.location.search.substr(1);
+		if (u != '') {
+			var parms = decodeURIComponent(u).split('&');
+			for (var i = 0, len = parms.length; i < len; i++) {
+				if (parms[i] != '') {
+					var p = parms[i].split("=");
+					if (p.length == 1 || (p.length == 2 && p[1] == '')) {// p | p=  
+						data.push([ '' ]);
+						index[p[0]] = data.length - 1;
+					} else if (typeof (p[0]) == 'undefined' || p[0] == '') { // =c | =  
+						data[0] = [ p[1] ];
+					} else if (typeof (index[p[0]]) == 'undefined') { // c=aaa  
+						data.push([ p[1] ]);
+						index[p[0]] = data.length - 1;
+					} else {// c=aaa  
+						data[index[p[0]]].push(p[1]);
+					}
+				}
+			}
+		}
+	})();
+	return {
+		// 获得参数,类似request.getParameter()  
+		parm : function(o) { // o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o][0]
+						: data[index[o]][0]);
+			} catch (e) {
+			}
+		},
+		//获得参数组, 类似request.getParameterValues()  
+		parmValues : function(o) { //  o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o] : data[index[o]]);
+			} catch (e) {
+			}
+		},
+		//是否含有parmName参数  
+		hasParm : function(parmName) {
+			return typeof (parmName) == 'string' ? typeof (index[parmName]) != 'undefined'
+					: false;
+		},
+		// 获得参数Map ,类似request.getParameterMap()  
+		parmMap : function() {
+			var map = {};
+			try {
+				for ( var p in index) {
+					map[p] = data[index[p]];
+				}
+			} catch (e) {
+			}
+			return map;
+		}
+	}
+}();
+	
+function init() {
+	//var id = UrlParm.parm("id");
+	//document.getElementById("id").value = id;
+	check();
+}
+	var studio;
+	function check() {
+		
+		//var form = document.getElementById("myform");
+		var id = UrlParm.parm("id");
+		studio = id;
+		alert(id);
+		var url = "SeatSearch";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = checkComplete;
+			var data = "&id=" + id; 
+			req.send(data);
+		}
+	}
+
+	function checkComplete() {
+		 if (req.readyState == 4 && req.status == 200) {
+		// 	alert(req.responseText);
+		 }
+		//var json = [{"seat_id":"1","studio_id":"1","row":"1","col":"1","status":"1"},{"seat_id":"2","studio_id":"1","row":"1","col":"2","status":"1"},{"seat_id":"3","studio_id":"1","row":"1","col":"3","status":"1"},{"seat_id":"4","studio_id":"1","row":"1","col":"4","status":"1"},{"seat_id":"5","studio_id":"1","row":"1","col":"5","status":"1"},{"seat_id":"6","studio_id":"1","row":"1","col":"6","status":"1"},{"seat_id":"7","studio_id":"1","row":"1","col":"7","status":"1"},{"seat_id":"8","studio_id":"1","row":"1","col":"8","status":"1"},{"seat_id":"9","studio_id":"1","row":"1","col":"9","status":"1"},{"seat_id":"10","studio_id":"1","row":"1","col":"10","status":"1"},{"seat_id":"11","studio_id":"1","row":"2","col":"1","status":"1"},{"seat_id":"12","studio_id":"1","row":"2","col":"2","status":"0"},{"seat_id":"13","studio_id":"1","row":"2","col":"3","status":"0"},{"rowCount":"10","colCount":"10"}];
+		var json =JSON.parse(req.responseText);
+		table = document.createElement('table');
+		var length = json.length;
+		var size = json[length-1];
+		for(let i = 1;i<=size.rowCount;i++){
+			var rowCount = table.rows.length; //获得当前表格的行数
+			var row = table.insertRow(rowCount);//在tale里动态的增加tr
+			for(let j = 1;j<=size.colCount;j++){
+				var td = document.createElement('td');
+				td.className = 'cel';
+				var img =document.createElement('img');
+				img.id = 'cel'+i+"_"+j;
+				td.appendChild(img);
+				img.src = "座位素材/未选座位.jpg"
+				row.appendChild(td);
+				img.onclick = function(){
+                    if(!this.classList.contains('selected')){
+                        if(!this.classList.contains('select')){
+                            if((count+1)<=6){
+                                count++;
+                                this.src = "座位素材/选择座位.jpg";
+                                this.classList.add("select");
+                            }else{
+                                alert('最多选6个座位')
+                            }
+                        }else{
+                            this.src = "座位素材/未选座位.jpg";
+                            count--;
+                            this.classList.remove("select");
+                        }
+                    }
+				}
+			}
+		}
+		var zuowei = document.getElementById('zuowei');
+		zuowei.appendChild(table);
+		for(let i = 0;i<length-1;i++){
+			var row = json[i].row;
+			var col = json[i].col;
+			var img = document.getElementById("cel"+row+"_"+col);
+			if(json[i].status === "0"){
+				img.src = "座位素材/已选座位.jpg";
+                img.classList.add('selected');
+			}
+		}	
+	}
+	function post(){
+		var select = document.getElementsByClassName('select');
+		var seat = [];
+		for(let i = 0,length= select.length;i<length;i++){
+			var info = select[i].id.slice(3);
+			info = info.split("_");
+			var obj = {};
+			obj.row = info[0];
+			obj.col = info[1];
+			seat.push(obj);
+		}
+		var obj = {
+			seat:seat,
+			studio:2,
+			schedule:1
+		}
+		console.log(obj);
+		var data = JSON.stringify(obj);
+		alert(data);
+		if(confirm("是否付款")){
+			var url = "SeatCustomer";
+			req = new XMLHttpRequest();
+			if (req) {
+				//采用POST方式，异步传输
+				req.open("post", url, true);
+				//POST方式，必须加入如下头信息设定
+				req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+				req.onreadystatechange = postComplete;
+				req.send("s="+data);
+			}
+		}
+		
+	}
+	function postComplete(){
+		if (req.readyState == 4 && req.status == 200) {
+			alert(req.responseText);
+		}
+	}
+</script>
+</head>
+<body onload="init()">
+	<div class="row" style="padding: 10px 10px">
+
+		<!-- 左导航栏 -->
+
+		<!-- 增加员工信息 -->
+		<div id="main" class="center">
+			<h3>屏幕</h3>
+			<div id="zuowei">
+
+			</div>
+			<button onclick="post()">提交</button>
+		</div>
+		<div id="bar">
+				<div>
+					<img src="座位素材/未选座位.jpg" alt="">
+					可选
+				</div>
+				<div>
+					<img src="座位素材/已选座位.jpg" alt="">
+					已选
+				</div>	
+		</div>
+	</div>
+		
+</body>
+</html>

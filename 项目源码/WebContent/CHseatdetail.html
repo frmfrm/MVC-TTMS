@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>影厅管理</title>
+<style>
+#main{
+	width: 43.33333333%;
+	float: left;
+	position: relative;
+	margin-left: 10%;
+}
+#main h3{
+	text-align: center;
+	padding: 10px;
+	width: 100%;
+	border: 1px solid #000;
+}
+#zuowei {
+	width: 100%;
+	height: 100%;
+	margin-top:  50px;
+}
+#zuowei table{
+	width: 100%;
+	height: 100%;
+}
+#zuowei table img{
+	width: 30px;
+	height: 30px;
+	display: block;
+	margin: 5px;
+	cursor: pointer;
+}
+.table th, .table td {
+	text-align: center;
+	height: 30px;
+}
+button{
+	position: absolute;
+	right: 0px;
+	bottom: -80px;
+	background: #337ab7;
+	width: 60px;
+	height: 40px;
+	border-radius: 7px;
+	font-size: 20px;
+	color: #fff;
+	border: none;
+}
+#bar{
+	margin-top: 100px;
+	width: 25%;
+	margin-left: 5%;
+	float: left;
+	font-size: 20px;
+}
+#bar>div{
+	margin-bottom: 20px;
+}
+#bar img{
+	width: 40px;
+	height: 40px;
+	display: inline-block;
+	margin-bottom: 20px;
+}
+</style>
+<script>
+UrlParm = function() { // url参数  
+	var data, index;
+	(function init() {
+		data = [];
+		index = {};
+		var u = window.location.search.substr(1);
+		if (u != '') {
+			var parms = decodeURIComponent(u).split('&');
+			for (var i = 0, len = parms.length; i < len; i++) {
+				if (parms[i] != '') {
+					var p = parms[i].split("=");
+					if (p.length == 1 || (p.length == 2 && p[1] == '')) {// p | p=  
+						data.push([ '' ]);
+						index[p[0]] = data.length - 1;
+					} else if (typeof (p[0]) == 'undefined' || p[0] == '') { // =c | =  
+						data[0] = [ p[1] ];
+					} else if (typeof (index[p[0]]) == 'undefined') { // c=aaa  
+						data.push([ p[1] ]);
+						index[p[0]] = data.length - 1;
+					} else {// c=aaa  
+						data[index[p[0]]].push(p[1]);
+					}
+				}
+			}
+		}
+	})();
+	return {
+		// 获得参数,类似request.getParameter()  
+		parm : function(o) { // o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o][0]
+						: data[index[o]][0]);
+			} catch (e) {
+			}
+		},
+		//获得参数组, 类似request.getParameterValues()  
+		parmValues : function(o) { //  o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o] : data[index[o]]);
+			} catch (e) {
+			}
+		},
+		//是否含有parmName参数  
+		hasParm : function(parmName) {
+			return typeof (parmName) == 'string' ? typeof (index[parmName]) != 'undefined'
+					: false;
+		},
+		// 获得参数Map ,类似request.getParameterMap()  
+		parmMap : function() {
+			var map = {};
+			try {
+				for ( var p in index) {
+					map[p] = data[index[p]];
+				}
+			} catch (e) {
+			}
+			return map;
+		}
+	}
+}();
+	
+function init() {
+	//var id = UrlParm.parm("id");
+	//document.getElementById("id").value = id;
+	check();
+}
+	var studio;
+function check() {
+		//var form = document.getElementById("myform");
+		console.log('check');
+		var id = UrlParm.parm("id");
+		studio = id;
+		//alert(id);
+		var url = "SeatSearch";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = checkComplete;
+			var data = "&id=" + id; 
+			req.send(data);
+		}
+	}
+
+	function checkComplete() {
+		console.log('执行');		
+		var number = 0;
+		if (req.readyState == 4 && req.status == 200) {
+		//alert(req.responseText);
+		
+		
+		var json =JSON.parse(req.responseText);
+		console.log(json);
+		var table = document.createElement('table');
+		var length = json.length;
+		console.log("length",length);
+		var size = json[length-1];
+		
+		for(let i = 1;i<=size.rowCount;i++){
+			
+			var rowCount = table.rows.length; //获得当前表格的行数
+			var row = table.insertRow(rowCount);//在tale里动态的增加tr
+			for(let j = 1;j<=size.colCount;j++){
+				//alert(size.colCount);
+				var td = document.createElement('td');
+				td.className = 'cel';
+				var img =document.createElement('img');
+				img.id = 'cel'+i+"_"+j;
+				td.appendChild(img);
+				img.src = "座位素材/ok.png"
+				row.appendChild(td);
+				img.onclick = function(){
+					if(this.className!=="select"){
+						this.src = "座位素材/已选座位.jpg";
+						this.className='select';
+					}else{
+						this.src = "座位素材/ok.png";
+						this.className ="";
+					}
+				}
+			}
+		}
+		var zuowei = document.getElementById('zuowei');
+		zuowei.appendChild(table);
+		for(let i = 0;i<length-1;i++){
+			var row = json[i].row;
+			var col = json[i].col;
+			var img = document.getElementById("cel"+row+"_"+col);
+			if(json[i].status === "0"){
+				img.src = "座位素材/已选座位.jpg"
+				img.className='select';
+			}
+		}	
+	}
+	}
+	function post(){
+		var url = "SeatUpdate";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = postComplete;
+			var select = document.getElementsByClassName('select');
+			var seat = [];
+			for(let i = 0,length= select.length;i<length;i++){
+				var info = select[i].id.slice(3);
+				info = info.split("_");
+				var obj = {};
+				obj.row = info[0];
+				obj.col = info[1];
+				seat.push(obj);
+			}
+			var obj = {
+				seat:seat,
+				studio:studio
+			}
+			console.log(obj);
+			var data ="&s=" + JSON.stringify(obj);
+			req.send(data);
+		}
+	}
+	function postComplete(){
+		if (req.readyState == 4 && req.status == 200) {
+			alert(req.responseText);
+		}
+	}
+	
+</script>
+</head>
+<body onload="init()">
+
+	<div
+		style="height: 50px; line-height: 50px; font-size: 25px; vertical-align: middle; text-align: center"
+		class="bg-primary">内涵剧院管理系统</div>
+
+	<div class="row" style="padding: 10px 10px">
+
+		<!-- 左导航栏 -->
+		<div class="col-md-2">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">导航</h3>
+				</div>
+				<div class="panel-body">
+					<table class="table table-hover">
+						<tr>
+							<td><img src="images/yingting.png" width="24px">&nbsp;&nbsp;<a
+								href="CHstudio.html"> 影厅管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/zuowei.png" width="24px">&nbsp;&nbsp;<a
+								href="CHseat.html"><font color="red">座位管理</font></a></td>
+						</tr>
+						<tr>
+							<td><img src="images/yingpian.png" width="24px">&nbsp;&nbsp;<a
+								href="CHplay.html">影片管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/dingpiao.png" width="24px">&nbsp;&nbsp;<a
+								href="CHschedule.html">计划管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHemployee.html">员工管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="cplay.html">我要买票</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHmyinformation.html">个人信息</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHxiaoshou.html">销售额</a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- 增加员工信息 -->
+		<div id="main">
+			<h3>屏幕</h3>
+			<div id="zuowei">
+
+			</div>
+			<button onclick="post()">提交</button>
+		</div>
+		<div id="bar">
+				<div>
+					<img src="座位素材/ok.png" alt="">
+					正常
+				</div>
+				<div>
+					<img src="座位素材/已选座位.jpg" alt="">
+					异常
+				</div>	
+		</div>
+	</div>
+		
+</body>
+</html>

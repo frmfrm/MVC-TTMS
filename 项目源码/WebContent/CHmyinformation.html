@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>个人信息</title>
+<style>
+body{
+	background:url("images/8.jpeg");
+
+}
+.table th, .table td {
+	text-align: center;
+	height: 30px;
+}
+
+
+</style>
+<script>
+UrlParm = function() { // url参数  
+	var data, index;
+	(function init() {
+		data = [];
+		index = {};
+		var u = window.location.search.substr(1);
+		console.log(u);
+		if (u != '') {
+			var parms = decodeURIComponent(u).split('&');
+			for (var i = 0, len = parms.length; i < len; i++) {
+				if (parms[i] != '') {
+					var p = parms[i].split("=");
+					if (p.length == 1 || (p.length == 2 && p[1] == '')) {// p | p=  
+						data.push([ '' ]);
+						index[p[0]] = data.length - 1;
+					} else if (typeof (p[0]) == 'undefined' || p[0] == '') { // =c | =  
+						data[0] = [ p[1] ];
+					} else if (typeof (index[p[0]]) == 'undefined') { // c=aaa  
+						data.push([ p[1] ]);
+						index[p[0]] = data.length - 1;
+					} else {// c=aaa  
+						data[index[p[0]]].push(p[1]);
+					}
+				}
+			}
+		}
+	})();
+	return {
+		// 获得参数,类似request.getParameter()  
+		parm : function(o) { // o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o][0]
+						: data[index[o]][0]);
+			} catch (e) {
+			}
+		},
+		//获得参数组, 类似request.getParameterValues()  
+		parmValues : function(o) { //  o: 参数名或者参数次序  
+			try {
+				return (typeof (o) == 'number' ? data[o] : data[index[o]]);
+			} catch (e) {
+			}
+		},
+		//是否含有parmName参数  
+		hasParm : function(parmName) {
+			return typeof (parmName) == 'string' ? typeof (index[parmName]) != 'undefined'
+					: false;
+		},
+		// 获得参数Map ,类似request.getParameterMap()  
+		parmMap : function() {
+			var map = {};
+			try {
+				for ( var p in index) {
+					map[p] = data[index[p]];
+				}
+			} catch (e) {
+			}
+			return map;
+		}
+	}
+}();
+	//查找显示
+function init() {
+	console.log(localStorage.getItem('useridLocal'));
+	
+	var url = "MyInfo";
+	req = new XMLHttpRequest();
+	if (req) {
+		//采用POST方式，异步传输
+		req.open("post", url, true);
+		//POST方式，必须加入如下头信息设定
+		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		req.onreadystatechange = initComplete;
+		var data = "userid="
+				+ localStorage.getItem('useridLocal') + "&type=search";
+		req.send(data);
+	
+	/* var type = UrlParm.parm("type");
+	var name = UrlParm.parm("name");
+	var id = UrlParm.parm("id");
+	var price = UrlParm.parm("price");
+	var intro = UrlParm.parm("introduction");
+	var status = UrlParm.parm("status");
+	var image = UrlParm.parm("image");
+	var length = UrlParm.parm("length");
+	var playtype = UrlParm.parm("playtype");
+	document.getElementById("playid").value = id;
+	document.getElementById("playname").value = name;
+	document.getElementById("playtype").value = playtype;
+	document.getElementById("playlength").value = length;
+	document.getElementById("playstatus").value = status;
+	document.getElementById("playprice").value = price;
+	document.getElementById("playimage").value = image;
+	document.getElementById("bigImage").src = './images/' + image  +'.jpg';
+	document.getElementById("playintro").value = intro;
+	document.getElementById("type").value = type; */
+}
+}
+	function initComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			//alert(req.responseText);
+			var json =  JSON.parse(req.responseText);
+			
+			var userid = localStorage.getItem('useridLocal');
+			var name = json[0].name;
+			var password = json[0].password;
+			var status = json[0].status;
+			var address = json[0].address;
+			var card = json[0].card;
+			var sex = json[0].sex;
+			var age = json[0].age;
+			var phone = json[0].phone;
+			
+			
+			document.getElementById("myid").value = userid;
+			document.getElementById("myname").value = name;
+			document.getElementById("mypass").value = password;
+			document.getElementById("mystatus").value = status;
+			document.getElementById("myaddress").value = address;
+			document.getElementById("mycard").value = card;
+			document.getElementById("mysex").value = sex;
+			document.getElementById("myage").value = age;
+			document.getElementById("myphone").value = phone;
+		}
+	}
+	
+	
+	//修改
+	function check() {
+		userid = document.getElementById("myid").value ;
+		name = document.getElementById("myname").value ;
+		password = document.getElementById("mypass").value ;
+		status = document.getElementById("mystatus").value ;
+		address = document.getElementById("myaddress").value ;
+		card = document.getElementById("mycard").value ;
+		sex = document.getElementById("mysex").value ;
+		age = document.getElementById("myage").value;
+		phone =document.getElementById("myphone").value;
+		
+
+		
+		var url = "MyInfo";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = checkComplete;
+			var data = "userid="
+					+ localStorage.getItem('useridLocal') + "&type=modify";
+			
+			var data = "type=modify"  + "&userid="
+			+ localStorage.getItem('useridLocal') + "&name="
+			+ name + "&password="
+			+ password + "&status=" + status
+			+ "&address=" + address + "&card=" + card
+			+ "&sex=" + sex + "&age=" + age
+			+ "&phone=" + phone;
+			req.send(data);
+			//alert(name);
+		}
+	}
+
+	function checkComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			alert(req.responseText);
+		}
+	}
+</script>
+</head>
+<body onload="init()">
+
+	<div
+		style="height: 50px; line-height: 50px; font-size: 25px; vertical-align: middle; text-align: center"
+		class="bg-primary">内涵剧院管理系统</div>
+
+	<div class="row" style="padding: 10px 10px">
+
+		<!-- 左导航栏 -->
+		<div class="col-md-2">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">导航</h3>
+				</div>
+				<div class="panel-body">
+					<table class="table table-hover">
+						<tr>
+							<td><img src="images/yingting.png" width="24px">&nbsp;&nbsp;<a
+								href="CHstudio.html"> 影厅管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/zuowei.png" width="24px">&nbsp;&nbsp;<a
+								href="CHseat.html">座位管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/yingpian.png" width="24px">&nbsp;&nbsp;<a
+								href="CHplay.html">影片管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/dingpiao.png" width="24px">&nbsp;&nbsp;<a
+								href="CHschedule.html">计划管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHemployee.html">员工管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="cplay.html">我要买票</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHmyinformation.html"><font color="red">个人信息</font></a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHxiaoshou.html">销售额</a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 增加员工信息 -->
+		<div class="col-md-10" style="padding-top: 10px">
+			<img id="bigImage" >
+			<form id="myform" class="form-horizontal" role="form" action="#"
+				method="post">
+				<input type="hidden" id="type" name="type">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的id</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="myid"
+							id="myid" disabled="disabled">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的名字</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="myname"
+							id="myname" >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的密码</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="mypass"
+							id="mypass" >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的权限</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="mystatus"
+							id="mystatus" disabled="disabled">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的地址</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="myaddress"
+							id="myaddress">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的银行卡号</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="mycard"
+							id="mycard" >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的性别</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="mysex"
+							id="mysex" >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的年龄</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="myage"
+							id="myage" >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">我的联系方式</label>
+					<div class="col-sm-6">
+						<input type="text" class="form-control" name="myphone"
+							id="myphone" >
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label"
+						style="color: red; font-weight: bold;"></div>
+					<div class="col-sm-6">
+						<!-- <input type="hidden" name="method" value="add"> -->
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<button type="button" class="btn btn-primary" onclick="check()">提
+							交</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						
+					</div>
+				</div>
+			</form>
+
+		</div>
+	</div>
+</body>
+</html>

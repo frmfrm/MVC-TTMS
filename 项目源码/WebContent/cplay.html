@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>影厅管理</title>
+<style>
+body {
+	width: 100%
+}
+.row{
+    width: 100%;
+}
+a{
+	text-decoration:none;
+	color:#000;
+}
+a:hover{
+	text-decoration:none;
+	color:#000;
+}
+p{
+    font-size: 18px;
+    border-bottom:2px #337ab7 solid;
+    height:30px;
+    line-height: 20px;
+    width: 76px;
+}
+.play{
+	width:160px;
+	height:250px;
+	background-color:rgba(193,210,240,0.4);
+	float:left;
+	margin:20px 25px;
+	/* margin-bottom:20px; */
+	position:relative;
+    cursor: pointer;
+}
+.play img{
+	display:block;
+	width:100%;
+	height:85%;
+}
+.play h3{
+	text-align:center;
+    font:12px/1.5 tahoma,arial,'Hiragino Sans GB','\5b8b\4f53',sans-serif;
+    line-height: 15%;
+}
+.play .bg{
+    width: 100%;
+    height: 85%;
+    position: absolute;
+    /* background: blac; */
+    top: -50px;
+    /* opacity: 0; */
+    background: rgb(0, 0, 0,0);
+    transition: all .2s ease-out;
+}
+.play:hover .bg{
+    background: rgb(0, 0, 0,.4);
+    top: 0;
+}
+.col-md-10{
+    margin: 0 200px;
+    width: 1080px;
+    display: block;
+}
+.search{
+	margin: 0 990px;
+    width: 1080px;
+    display: block;
+}
+</style>
+
+</head>
+<body>
+<div style="height:300px; line-height: 50px; font-size: 25px; vertical-align: middle; text-align: center" class="bg-primary">
+<img src="images/5.jpg" alt=""style="width:100%; height:300px; position:absolute; top:0; left:0;">
+</div>
+<div class="row" style="padding: 10px 10px">
+<!-- 查询块 -->
+	<div class="search">
+		<form class="form-inline" name="myForm" action="#" method="post">
+			<!-- <input type="hidden" name="method" value="search"/> -->
+			<input type="text" class="form-control" id="playname" name="playname"/>&nbsp;&nbsp; 
+			<!--  <button class="btn btn-primary" onclick="search()">cha</button>		-->	
+			<input type="button" class="btn btn-primary" value="查   询" onclick = "search()"/>&nbsp;&nbsp; 
+		</form>
+	</div>
+   
+  <div class="col-md-10" style="padding-top: 10px">
+    <p>正在热映</p>
+    <hr>
+	<!-- 员工信息显示-->
+	<div style="padding-top: 10px;" id="info">
+		
+	</div>
+	
+
+	<!-- 分页 -->
+	<!-- 
+		<div class="text-center">
+			<nav>
+			  <ul class="pagination">
+			    <li><a href="#">首页</a></li>
+			    <li><a href="#">上一页</a></li>
+			    <li><a href="#">下一页</a></li>
+			    <li><a href="#">末页</a></li>
+			  </ul>
+			</nav>
+		</div>
+		-->
+  </div>
+</div>
+
+</body>
+<script src="js/jquery-2.1.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<script>
+	init();
+    function search(){
+        console.log('s');
+		var url = "cPlaySearch";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = playComplete;
+            //req.send();
+			req.send("&playname="+document.getElementById("playname").value);
+		}
+	}
+
+	function playComplete() {
+        console.log('okk');
+		var info = document.getElementById("info");
+		var play = document.getElementsByClassName('play');
+		var num = play.length;
+		while(num>=1){
+			info.removeChild(play[num-1]);
+			num--;
+		}
+		// if (req.readyState == 4 && req.status == 200) {
+			//alert(req.responseText);
+		var json =  JSON.parse(req.responseText);//转换为json对象
+            //var json = [{"id":"1","name":"泰坦尼克号","introduction":"关于爱与生命","type":"爱情片","image":"11","length":"150","ticketPrice":"40.0","status":"1"},{"id":"2","name":"火星救援","introduction":"拯救只在两亿两千五百万公里以外的天空","type":"科幻片","image":"12","length":"135","ticketPrice":"35.0","status":"1"},{"id":"3","name":"罗马假日","introduction":"因为一个人爱上一座城","type":"爱情片","image":"13","length":"140","ticketPrice":"30.0","status":"1"},{"id":"4","name":"多啦a梦不舍天真","introduction":"我会永远陪在你身边","type":"动画片","image":"14","length":"135","ticketPrice":"34.0","status":"1"},{"id":"5","name":"星际穿越","introduction":"当我归来，你已垂暮，我一次呼吸划过了你一辈子的岁月","type":"科幻片","image":"16","length":"125","ticketPrice":"32.0","status":"1"},{"id":"6","name":"星际穿越","introduction":"当我归来，你已垂暮，我一次呼吸划过了你一辈子的岁月","type":"科幻片","image":"16","length":"125","ticketPrice":"32.0","status":"1"}]
+		
+			console.log(json);
+			//alert(json.length);
+			for(let i = 0,length=json.length;i<length;i++){
+				var div = document.createElement('a');
+				div.style.display = 'block';
+				div.className = "play";
+				var img = document.createElement('img');
+                var bg = document.createElement('div');
+                bg.classList.add('bg');
+				var h3 = document.createElement('h3');
+				img.src = './images/'+json[i].image + '.jpg';
+				div.href = "cplaydetail.html?type=search&id="+json[i].id+'&name='+json[i].name+'&introduction='+json[i].introduction+'&playtype='+json[i].type+'&image='+json[i].image+'&price='+json[i].ticketPrice+'&status='
+						+json[i].status+'&length='+json[i].length
+						+'&detailintro='+json[i].detailintro + '&director=' + json[i].director + '&mainactor=' + json[i].mainactor;
+				h3.innerHTML = '选座购票';
+                div.appendChild(bg);
+				div.appendChild(img);
+                div.appendChild(h3);
+				info.appendChild(div);
+			// }
+		}	
+	}
+	
+	
+
+	function init(){    	
+    	search();
+    	//alert("又加载");
+    }
+
+</script>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>计划管理</title>
+<style>
+body {
+	width: 100%;
+		background:url("images/8.jpeg");
+	
+}
+
+.table th, .table td {
+	text-align: center;
+	height: 30px;
+}
+</style>
+<script src="js/jquery-2.1.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<script>
+    function search(){
+		var url = "ScheduleSearch";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = searchComplete;
+			req.send("type=searchall"+"&name="+document.getElementById("studioname").value);
+		}
+	}
+
+	function searchComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			//alert(req.responseText);
+			var theTable = document.getElementById("table");//table的id
+			var num=theTable.rows.length;
+			while(num>1){
+				theTable.deleteRow(num-1);
+				num=theTable.rows.length;
+			}
+			var json =  JSON.parse(req.responseText);//转换为json对象
+			for(i=0; i<json.length; i++){
+				var rowCount = theTable.rows.length; //获得当前表格的行数
+				var row = theTable.insertRow(rowCount);//在tale里动态的增加tr
+				row.insertCell(0).innerHTML = json[i].Schedule_id;
+				row.insertCell(1).innerHTML = json[i].Schedule_name;
+				row.insertCell(2).innerHTML = json[i].play_id;
+				row.insertCell(3).innerHTML = json[i].studio_id;
+				row.insertCell(4).innerHTML = json[i].time;
+				row.insertCell(5).innerHTML = json[i].endtime;
+				row.insertCell(6).innerHTML = json[i].discount;
+				row.insertCell(7).innerHTML = json[i].price;
+				row.insertCell(8).innerHTML = json[i].status;
+				
+				
+				
+				var tmp = json[i].Schedule_id + ",\'" + json[i].Schedule_name + "\'," +json[i].play_id + "," + json[i].studio_id + ",\'" + json[i].time +"\'," + json[i].discount +",\'" 
+				+ json[i].price +"\','" + json[i].status +"\','"+json[i].ticket_status+"\','"+json[i].endtime+"\'";
+				console.log(tmp);
+				if(json[i].ticket_status==="1"){
+					row.insertCell(9).innerHTML = '<input type="button" class="btn btn-xs btn-primary" disabled="disabled" value="生成票" onclick="create('+ tmp +')" />';
+				}else{
+					console.log(json[i]);
+					row.insertCell(9).innerHTML = '<input type="button" class="btn btn-xs btn-primary" value="生成票" onclick="create('+ tmp +')" />';
+				}
+				row.insertCell(10).innerHTML = '<input type="button" class="btn btn-xs btn-primary" value="修改" onclick="modify('+ tmp +')" />&nbsp;&nbsp;<input type="button" class="btn btn-xs btn-danger" value="删除" onclick="del('+json[i].Schedule_id+')" />';
+			}
+		}
+	}
+	
+	function modify(a,b,c,d,e,f,g,h,i,j){
+		window.location="CHschedule_detail.html?type=modify&Schedule_id="+a+"&Schedule_name="+b+"&play_id="+c+"&studio_id="+d+"&time="+e+"&discount="+f+"&price="+g+"&status="+h+"&ticket_status="+i+"&endtime"+j;
+	}
+	
+	
+	
+	function del(id){
+		if(confirm("确定删除？")) {
+
+		var url = "ScheduleDelete";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = delComplete;
+			req.send("id="+id);
+		}
+		}
+
+	}
+	
+	function delComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			if(req.responseText==1){
+				alert("删除成功");
+				search();
+
+			}
+			else
+				alert("数据删除失败，请重试");
+		}
+	}
+	function create(a,b,c,d,e,f,g,h,i,j){
+		var url = "Scheduleshengchengpiao";
+		req = new XMLHttpRequest();
+		if (req) {
+			//采用POST方式，异步传输
+			req.open("post", url, true);
+			//POST方式，必须加入如下头信息设定
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.onreadystatechange = createComplete;
+			var data = "type=create&Schedule_id="+a+"&Schedule_name="+b+"&play_id="+c+"&studio_id="+d+"&time="+e+"&discount="+f+"&price="+g+"&play_type="+h+"&ticket_status="+i+"&endtime="+j;
+			req.send(data);
+		}
+	}
+	function createComplete() {
+		if (req.readyState == 4 && req.status == 200) {
+			if(req.responseText==1){
+				alert("生成成功");
+				search();
+			
+			}
+			else
+				alert("生成失败，请重试");
+		}
+	}
+    function init(){    	
+    	search();
+    }
+</script>
+</head>
+<body onload = "search()">
+  <div
+		style="height: 50px; line-height: 50px; font-size: 25px; vertical-align: middle; text-align: center"
+		class="bg-primary">内涵剧院管理系统</div>
+
+  <div class="row" style="padding: 10px 10px">
+
+		<!-- 左导航栏 -->
+		<div class="col-md-2">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">导航</h3>
+				</div>
+				<div class="panel-body">
+					<table class="table table-hover">
+						<tr>
+							<td><img src="images/yingting.png" width="24px">&nbsp;&nbsp;<a
+								href="CHstudio.html"> 影厅管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/zuowei.png" width="24px">&nbsp;&nbsp;<a
+								href="CHseat.html">座位管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/yingpian.png" width="24px">&nbsp;&nbsp;<a
+								href="CHplay.html">影片管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/dingpiao.png" width="24px">&nbsp;&nbsp;<a
+								href="CHschedule.html"><font color="red">计划管理</font></a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHemployee.html">员工管理</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="cplay.html">我要买票</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHmyinformation.html">个人信息</a></td>
+						</tr>
+						<tr>
+							<td><img src="images/renyuan.png" width="24px">&nbsp;&nbsp;<a
+								href="CHxiaoshou.html">销售额</a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+  <div class="col-md-10" style="padding-top: 10px">
+
+	<!-- 查询块 -->
+	<div class="search">
+		<form class="form-inline" name="myForm" action="#" method="post">
+			<!-- <input type="hidden" name="method" value="search"/> -->
+			影厅名称:
+			<input type="text" class="form-control" id="studioname" name="studioname"/>&nbsp;&nbsp; 
+			<input type="button" class="btn btn-primary" value="查   询" onclick="search()" />&nbsp;&nbsp; 
+			<input type="button" class="btn btn-danger" value="增   加" onclick="javascript:window.location='CHschedule_detail.html?type=add'" />
+		</form>
+	</div>
+
+
+	<!-- 员工信息显示-->
+	<div style="padding-top: 10px;">
+		<table id="table" class="table table-bordered table-hover"
+			style="text-align: center;">
+			<tr>
+				<th>计划编号</th>
+				<th>计划名称</th>
+				<th>演出厅编号</th>
+				<th>剧目编号</th>
+				<th>上映时间</th>
+				<th>结束时间</th>
+				<th>折扣</th>
+				<th>价格</th>
+				<th>上映状态</th>
+				<th>生成票否</th>
+				<th></th>				
+			</tr>
+
+		</table>
+	</div>
+
+	<!-- 分页 -->
+	<!-- 
+		<div class="text-center">
+			<nav>
+			  <ul class="pagination">
+			    <li><a href="#">首页</a></li>
+			    <li><a href="#">上一页</a></li>
+			    <li><a href="#">下一页</a></li>
+			    <li><a href="#">末页</a></li>
+			  </ul>
+			</nav>
+		</div>
+		-->
+  </div>
+</div>
+
+</body>
+</html>
